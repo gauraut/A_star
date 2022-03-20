@@ -126,38 +126,38 @@ def findNeigh(node, visited, nodelist, obs, step, fpoint, ipoint):
 	fn, x1, y1, theta1 = checkMove(node, img, step, 60)
 	sn, x2, y2, theta2 = checkMove(node, img, step, 30)
 	tn, x3, y3, theta3 = checkMove(node, img, step, 0)
-	fon, x4, y4, theta4 = checkMove(node, img, step, -30)
-	fin, x5, y5, theta5 = checkMove(node, img, step, -60)
+	fon, x4, y4, theta4 = checkMove(node, img, step, 330)
+	fin, x5, y5, theta5 = checkMove(node, img, step, 300)
 
 	if fn : 
 		fnode = Node([x1, y1, theta1])
-		xc, yc, thetac = x1, 249-(y1), theta1
-		if not visited[yc][xc][thetac] and [x1, y1, theta1] not in nodelist :
-			ne.append([fnode,euclid(xc,yc,fpoint)+euclid(xc,yc,[x,y])])
+		yc, xc, thetac = int(round(2*x1)), int(round(2*y1)), int(theta1/30)
+		if not visited[yc][xc][thetac]  :
+			ne.append([fnode,euclid(xc,yc,fpoint)+step])
 
 	if sn : 
 		snode = Node([x2, y2, theta2])
-		xc, yc, thetac = x2, 249-(y2), theta2
-		if not visited[yc][xc][thetac] and [x2, y2, theta2] not in nodelist :
-			ne.append([snode,euclid(xc,yc,fpoint)+euclid(xc,yc,[x,y])])
+		yc, xc, thetac = int(round(2*x2)), int(round(2*(y2))), int(theta2/30)
+		if not visited[yc][xc][thetac]  :
+			ne.append([snode,euclid(xc,yc,fpoint)+step])
 
 	if tn : 
 		tnode = Node([x3, y3, theta3])
-		xc, yc, thetac = x3, 249-(y3), theta3
-		if not visited[yc][xc][thetac] and [x3, y3, theta3] not in nodelist :
-			ne.append([tnode,euclid(xc,yc,fpoint)+euclid(xc,yc,[x,y])])
+		yc, xc, thetac = int(round(2*x3)), int(round(2*(y3))), int(theta3/30)
+		if not visited[yc][xc][thetac] :
+			ne.append([tnode,euclid(xc,yc,fpoint)+step])
 
 	if fon : 
 		fonode = Node([x4, y4, theta4])
-		xc, yc, thetac = x4, 249-(y4), theta4
-		if not visited[yc][xc][thetac] and [x4, y4, theta4] not in nodelist :
-			ne.append([fonode,euclid(xc,yc,fpoint)+euclid(xc,yc,[x,y])])
+		yc, xc, thetac = int(round(2*x4)), int(round(2*(y4))), int(theta4/30)
+		if not visited[yc][xc][thetac] :
+			ne.append([fonode,euclid(xc,yc,fpoint)+step])
 
 	if fin : 
 		finode = Node([x5, y5, theta5])
-		xc, yc, thetac = x5, 249-(y5), theta5
-		if not visited[yc][xc][thetac] and [x5, y5, theta5] not in nodelist :
-			ne.append([finode,euclid(xc,yc,fpoint)+euclid(xc,yc,[x,y])])
+		yc, xc, thetac = int(round(2*x5)), int(round(2*(y5))), int(theta5/30)
+		if not visited[yc][xc][thetac] :
+			ne.append([finode,euclid(xc,yc,fpoint)+step])
 
 	return ne
 
@@ -166,9 +166,9 @@ def astar(ipoint, fpoint, im, am, step) :
 	img = im.copy()
 	amg = am.copy()
 	thresh = 0.5
-	visited = np.zeros((500, 800, 360), dtype=bool)
+	visited = np.zeros((500, 800, 12), dtype=bool)
 	inode = Node(ipoint)
-	# inode.weight = 0
+	
 	inode.weight = euclid(inode.coord[0],inode.coord[1], fpoint)
 	nlist = [inode]
 	heapq.heapify(nlist)
@@ -181,7 +181,9 @@ def astar(ipoint, fpoint, im, am, step) :
 		pcoord = pnode.coord
 		pweight = pnode.weight
 
-		visited[249-pcoord[1]][pcoord[0]][pcoord[2]] = True
+		pcoordx, pcoordy, pcoordt = int(round(2*(pcoord[1]))), int(round(2*pcoord[0])), pcoord[2]
+		print(pcoordx, pcoordy, pcoordt)
+		visited[pcoordx][pcoordy][pcoordt//30] = 1
 		heapq.heappop(nlist)
 
 		if pcoord[0] == fpoint[1] and pcoord[1] == fpoint[0] and pcoord[2] == fpoint[2] :
