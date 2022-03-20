@@ -53,7 +53,7 @@ class Robot:
 					opn.append([len(storage), move, cost, self.parent])
 				else:
 					location, location2 = find(move, visited, opn)
-					cost = self.cost + step
+					cost = self.cost + self.step
 					if storage[location][2] > cost:
 						storage[location][2] = cost
 						storage[location][3] = self.parent
@@ -66,7 +66,11 @@ class Robot:
 		pass
 
 def find(move, visited, opn):
-	return visited.index(move), opn.index(move)
+	# import pdb; pdb.set_trace()
+	ar_opn = np.array(opn)[:,1]
+	ar_opn = np.array([np.array(k) for k in ar_opn])
+	ar_opn = ar_opn.tolist()
+	return visited.index(move), ar_opn.index(move)
 
 def exist(move, visited):
 	if move in visited:
@@ -104,6 +108,7 @@ def a_star(goal, robot):
 		robot.parent = node[0]
 		robot.cost = node[2]
 		robot.orn = node[1][2]
+	return storage
 
 
 def origin_shift(initial, goal):
@@ -113,6 +118,30 @@ def origin_shift(initial, goal):
 	goal[0] = origin_shift - goal[0]
 	return initial, goal
 
+def animate(storage, explored):
+	b = create_graph()*0
+	g = create_graph()*255
+	r = create_graph()*0
+	graph = np.dstack([b,g,r]).astype(np.uint8)
+	width, height, shape2 = graph.shape
+	writer= cv2.VideoWriter('working.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 1200, (height,width))
+
+	for i in explored:
+		graph[storage[i][0][0], storage[i][0][1]] = np.array([0, 155, 255])
+		writer.write(graph)
+		cv2.imshow('Graph', graph)
+		cv2.waitKey(1)
+	
+	curr_key = len(storage)-1
+	while curr_key != 0:
+		graph[storage[curr_key][0][0], storage[curr_key][0][1]] = np.array([255, 0, 0])
+		curr_key = storage[curr_key][2]
+	start = time.time()
+	while time.time() - start < 0.2:
+		writer.write(graph)
+	writer.release()
+	cv2.imshow('Graph', graph)
+	cv2.waitKey(0)
 
 def main():
 	ip_x = int(input("Enter initial x coordinate:\n"))
@@ -135,7 +164,8 @@ def main():
 	
 	robot = Robot(initial, radius, step, clearance)
 
-	a_star(goal, robot)
+	coords = a_star(goal, robot)
+	animate(storage)
 	end_time = time.time()
 
 if __name__ == '__main__':
