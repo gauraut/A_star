@@ -30,27 +30,25 @@ class Robot:
 				ec = (self.rd + self.cl)**2 - (j-self.pos[1])**2 - (i-self.pos[0])**2
 				if ec >= 0:
 					mask[i,j] = 1
-		import pdb; pdb.set_trace()
+		# import pdb; pdb.set_trace()
 		result = np.bitwise_and(graph.astype(np.uint8), mask.astype(np.uint8))
 		if result.any() == 1:
 			return False
 		else:
 			return True
 
-			
-
 	def action(self, storage, opn, visited, graph):
-		action_set = self.orn+np.array([-np.pi/3, -np.pi/6, 0, np.pi/6, np.pi/3])
+		action_set = self.orn+np.array([-60, -30, 0, 30, 60])
 		for i in action_set:
-			new_x = round(self.step*np.cos(i))+self.pos[1]
-			new_y = round(self.step*np.sin(i))+self.pos[0]
+			new_x = round(self.step*np.cos(i*(np.pi/180)))+self.pos[1]
+			new_y = round(self.step*np.sin(i*(np.pi/180)))+self.pos[0]
 			new_orn = i
 			move = [new_y, new_x, new_orn]
 
 			if self.move_possible(move, graph):
 				if not exist(move, visited):
-					cost = self.cost + step
-					storage[len(storage)].append([len(storage), move, cost, self.parent])
+					cost = self.cost + self.step
+					storage[len(storage)] = [len(storage), move, cost, self.parent]
 					visited.append(move)
 					opn.append([len(storage), move, cost, self.parent])
 				else:
@@ -67,11 +65,14 @@ class Robot:
 	def perform_action(self, move):
 		pass
 
-def find():
-	pass
+def find(move, visited, opn):
+	return visited.index(move), opn.index(move)
 
-def exist():
-	pass
+def exist(move, visited):
+	if move in visited:
+		return True
+	else:
+		return False
 
 def check(coords1, coords2):
 	if coords1 == coords2:
@@ -83,7 +84,7 @@ def get_newnode(opn, goal):
 	# import pdb; pdb.set_trace()
 	ar_opn = np.array(opn)[:,1]
 	ar_opn = np.array([np.array(k) for k in ar_opn])
-	dist = np.sum((ar_opn[:2]-goal[:2])**2, axis=1)
+	dist = np.sum((ar_opn[:,:2]-goal[:2])**2, axis=1)
 	idx = np.argmin(dist)
 	curr_node = opn.pop(idx)
 	return curr_node, opn
@@ -125,8 +126,8 @@ def main():
 	radius = int(input("Enter robot's radius:\n"))
 	start_time = time.time()
 
-	ip_orn = ip_orn*(np.pi/180)
-	g_orn = g_orn*(np.pi/180)
+	ip_orn = ip_orn
+	g_orn = g_orn
 
 	initial = [ip_y, ip_x, ip_orn]
 	goal = [g_y, g_x, g_orn]
