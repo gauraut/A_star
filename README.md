@@ -1,6 +1,6 @@
 ## A-Star Algorithm
 
-#Authors 
+# Authors 
 Advait Patole
 Gaurav Raut 
 
