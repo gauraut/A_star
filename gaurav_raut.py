@@ -160,21 +160,22 @@ def animate(storage):
 	for i in storage.values():
 		if i[0]==0:
 			curr_point = np.array(i[1])[:2]
-			graph = cv2.circle(graph, curr_point[::-1], 2, -1)
+			# import pdb; pdb.set_trace()
+			graph = cv2.circle(graph, tuple(curr_point[::-1]), 1, [0, 155, 255], -1)
 			continue
 		parent = i[3]
 		par_point = np.array(storage[parent][1])[:2]
 		curr_point = np.array(i[1])[:2]
-		graph = cv2.arrowedLine(graph, par_point[::-1], curr_point[::-1], [255,255,0], 1)
+		graph = cv2.arrowedLine(graph, tuple(par_point[::-1]), tuple(curr_point[::-1]), [255,255,0], 1)
 		writer.write(graph)
-		graph = cv2.circle(graph, curr_point[::-1], 1, [0, 155, 255], -1)
+		graph = cv2.circle(graph, tuple(curr_point[::-1]), 1, [0, 155, 255], -1)
 		writer.write(graph)
 
 	while curr_key != 0:
 		parent = storage[curr_key][3]
 		par_point = np.array(storage[parent][1])[:2]
 		curr_point = np.array(storage[curr_key][1])[:2]
-		graph = cv2.line(graph, par_point[::-1], curr_point[::-1], [255,255,255], 1)
+		graph = cv2.line(graph, tuple(par_point[::-1]), tuple(curr_point[::-1]), [255,255,255], 1)
 		curr_key = parent
 	start = time.time()
 	while time.time()-start < 0.009:
