@@ -183,11 +183,11 @@ def animate(storage):
 	cv2.imwrite('Graph.png', graph)
 
 def main():
-	ip_x = int(input("Enter initial x coordinate :\n"))
-	ip_y = int(input("Enter initial y coordinate:\n"))
+	ip_x = int(input("Enter initial x coordinate 10-389:\n"))
+	ip_y = int(input("Enter initial y coordinate 10-239:\n"))
 	ip_orn = int(input("Enter initial orientation:\n"))
-	g_x = int(input("Enter goal x coordinate:\n"))
-	g_y = int(input("Enter goal y coordinate:\n"))
+	g_x = int(input("Enter goal x coordinate 10-389:\n"))
+	g_y = int(input("Enter goal y coordinate 10-239:\n"))
 	g_orn = int(input("Enter goal orientation:\n"))
 	step = int(input("Enter step size between 1 and 10 inclusive:\n"))
 	clearance = int(input("Enter object clearance:\n"))
