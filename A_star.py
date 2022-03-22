@@ -24,7 +24,7 @@ class Robot:
 		mask = np.zeros(graph.shape)
 		shape_y, shape_x = graph.shape
 		# import pdb; pdb.set_trace()
-		if move[0] < 0 or move[0] > shape_y-1 or move[1] < 0 or move[1] > shape_x-1:
+		if move[0] < self.rd or move[0] > shape_y-1-self.rd or move[1] < self.rd or move[1] > shape_x-1-self.rd:
 			return False
 		for i in range(shape_y):
 			for j in range(shape_x): # can optimize this
@@ -39,6 +39,7 @@ class Robot:
 			return True
 
 	def action(self, storage, opn, visited, graph, goal):
+		length = len(storage)
 		action_set = (self.orn+np.array([300, 330, 0, 30, 60]))%360
 		for i in action_set:
 			new_x = round(self.step*np.cos(i*(np.pi/180)))+self.pos[1]
@@ -51,9 +52,10 @@ class Robot:
 			if self.move_possible(move, graph):
 				if not exist(move, visited):
 					cost = self.cost + self.step
-					storage[len(storage)] = [len(storage), move, cost, self.parent]
+					storage[length] = [length, move, cost, self.parent]
 					visited.append(move)
-					opn.append([len(storage), move, cost, self.parent])
+					opn.append([length, move, cost, self.parent])
+					length += 1
 					if move == goal:
 						return storage, opn, visited, True
 				else:
@@ -103,6 +105,18 @@ def get_newnode(opn, goal):
 
 def a_star(goal, robot):
 	graph = create_graph()
+	shp_gr = graph.shape
+
+	if robot.pos[0] >= shp_gr[0]-robot.rd or robot.pos[1] >= shp_gr[1]-robot.rd or goal[0] >= shp_gr[0]-robot.rd or goal[1] >= shp_gr[1]-robot.rd or robot.pos[0] < robot.rd or robot.pos[1] < robot.rd or goal[0] < robot.rd or goal[1] < robot.rd:
+		print("Nodes invalid.")
+		return {}
+	if graph[robot.pos[0], robot.pos[1]] == 1:
+		print("Initial node in obstacle space.")
+		return {}
+	if graph[goal[0], goal[1]] == 1:
+		print("Goal node in obstacle space.")
+		return {}
+
 	step_size = robot.step
 	# import pdb; pdb.set_trace()
 	closed = []
@@ -114,10 +128,12 @@ def a_star(goal, robot):
 		storage, opn, closed, found = robot.action(storage, opn, closed, graph, goal)
 		if found:
 			break
+
 		node, opn = get_newnode(opn, goal)
-		print(node[1])
+		
 		if ((node[1][0]-goal[0])**2 + (node[1][1]-goal[1])**2) < (step_size)**2 and node[1][2] == goal[2]:
 			break
+
 		robot.pos = node[1]
 		robot.parent = node[0]
 		robot.cost = node[2]
@@ -138,37 +154,36 @@ def animate(storage):
 	r = create_graph()*0
 	graph = np.dstack([b,g,r]).astype(np.uint8)
 	width, height, shape2 = graph.shape
+	writer= cv2.VideoWriter('working.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 15, (height,width))
 	# import pdb; pdb.set_trace()
 	curr_key = len(storage)-1
-	while curr_key != 0:
-		graph[storage[curr_key][1][0], storage[curr_key][1][1]] = np.array([255, 255, 255])
-		curr_key = storage[curr_key][3]
-	# opn = storage.values()
-	# ar_opn = np.array(opn)[:,1]
-	# ar_opn = np.array([np.array(k) for k in ar_opn])
-	# for i in ar_opn:
-	# 	graph[i[1], i[0]] = np.array([0, 155, 255])
-	# writer= cv2.VideoWriter('working.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 1200, (height,width))
+	for i in storage.values():
+		if i[0]==0:
+			curr_point = np.array(i[1])[:2]
+			graph = cv2.circle(graph, curr_point[::-1], 2, -1)
+			continue
+		parent = i[3]
+		par_point = np.array(storage[parent][1])[:2]
+		curr_point = np.array(i[1])[:2]
+		graph = cv2.arrowedLine(graph, par_point[::-1], curr_point[::-1], [255,255,0], 1)
+		writer.write(graph)
+		graph = cv2.circle(graph, curr_point[::-1], 1, [0, 155, 255], -1)
+		writer.write(graph)
 
-	# for i in explored:
-	# 	graph[storage[i][0][0], storage[i][0][1]] = np.array([0, 155, 255])
-	# 	writer.write(graph)
-	# 	cv2.imshow('Graph', graph)
-	# 	cv2.waitKey(1)
-	
-	# curr_key = len(storage)-1
-	# while curr_key != 0:
-	# 	graph[storage[curr_key][0][0], storage[curr_key][0][1]] = np.array([255, 0, 0])
-	# 	curr_key = storage[curr_key][2]
-	# start = time.time()
-	# while time.time() - start < 0.2:
-	# 	writer.write(graph)
-	# writer.release()
-	cv2.imshow('Graph', graph)
-	cv2.waitKey(0)
+	while curr_key != 0:
+		parent = storage[curr_key][3]
+		par_point = np.array(storage[parent][1])[:2]
+		curr_point = np.array(storage[curr_key][1])[:2]
+		graph = cv2.line(graph, par_point[::-1], curr_point[::-1], [255,255,255], 1)
+		curr_key = parent
+	start = time.time()
+	while time.time()-start < 0.009:
+		writer.write(graph)
+	writer.release()
+	cv2.imwrite('Graph.png', graph)
 
 def main():
-	ip_x = int(input("Enter initial x coordinate:\n"))
+	ip_x = int(input("Enter initial x coordinate :\n"))
 	ip_y = int(input("Enter initial y coordinate:\n"))
 	ip_orn = int(input("Enter initial orientation:\n"))
 	g_x = int(input("Enter goal x coordinate:\n"))
@@ -189,7 +204,8 @@ def main():
 	robot = Robot(initial, radius, step, clearance)
 
 	coords = a_star(goal, robot)
-	animate(coords)
+	if coords: 
+		animate(coords)
 	end_time = time.time()
 
 if __name__ == '__main__':

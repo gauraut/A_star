@@ -23,7 +23,6 @@ def create_graph(pad_size = 10):
 			e11 = calc_error(i, j, points1[0], points1[1])
 			e12 = calc_error(i, j, points1[1], points1[3])
 			e13 = calc_error(i, j, points1[3], points1[0])
-
 			e14 = calc_error(i, j, points1[2], points1[1])
 			e15 = calc_error(i, j, points1[1], points1[3])
 			e16 = calc_error(i, j, points1[3], points1[2])
