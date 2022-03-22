@@ -1,7 +1,8 @@
 ## A-Star Algorithm
 
 # Authors 
-Advait Patole
+Advait Patole 
+
 Gaurav Raut 
 
 Steps to run the code 
